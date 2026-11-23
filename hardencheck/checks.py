@@ -612,7 +612,8 @@ def defender(snap):
         c.status, c.detail = "fail", "off"
         if 1 in (reg(snap, "def_policy_rt"), reg(snap, "def_policy_off")):
             c.detail += " by Group Policy"
-            c.manual = "a policy turns it off (Windows Defender policies under HKLM\SOFTWARE\Policies); if you or your "                        "company didn't set it, malware did: remove the policy, then scan with Defender offline"
+            c.manual = (r"a policy turns it off (HKLM\SOFTWARE\Policies\Microsoft\Windows Defender); if you or your "
+                        "company didn't set it, malware did: remove the policy, then scan with Defender offline")
         else:
             c.fix = Fix("safe", "Set-MpPreference -DisableRealtimeMonitoring $false; Start-Sleep -Seconds 3; "
                                 "if (-not (Get-MpComputerStatus).RealTimeProtectionEnabled) "

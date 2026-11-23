@@ -71,8 +71,10 @@ Left alone on purpose: IPv6, mDNS, the WPAD service, the print spooler and netwo
 breaks casting, printers or Windows itself more often than it stops an attack on a home network.
 
 **Checked on a real Windows, every push.** The `roundtrip` CI job runs on a fresh GitHub Windows VM: scan, apply
-every safe fix for real, re-scan to confirm each one now passes, run the undo, and confirm every registry value
-and every Defender, firewall, SMB, service and Wi-Fi setting is back to exactly what it was.
+every safe fix for real (14 on the current runner image), re-scan to confirm each one now passes, run the undo,
+and confirm every registry value and every Defender, firewall, SMB, service and Wi-Fi setting is back to exactly
+what it was. Its first run caught a real trap: `Set-MpPreference` reports success even when a Group Policy
+overrides it, so every Defender fix now checks that it took, and a policy that turns Defender off is reported as one.
 
 ## What it checks
 
@@ -119,7 +121,7 @@ Exit codes: `0` no high or critical failure, `1` a high or critical check failed
 python -m unittest discover -s tests -t .
 ```
 
-34 tests: every check fed a hardened snapshot with one setting broken (56 cases) must fail that check and only
+34 tests: every check fed a hardened snapshot with one setting broken (57 cases) must fail that check and only
 that check, at the right severity, with the right fix level. Also undo values (old value back, missing value
 removed again, user settings written to the scanned user's hive even when an admin account runs the script),
 quoting of hostile names, scripts parsed by PowerShell's own parser, the command line, and a live scan on
