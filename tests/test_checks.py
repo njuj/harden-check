@@ -65,6 +65,7 @@ CASES = [
     (lambda s: s["ps"]["av"][0].update(state=393472), "antivirus", "critical", None),
     (_ps("mp", realtime=False), "defender", "critical", "safe"),
     (_ps("mp", tamper=False), "tamper", "high", None),
+    (lambda s: (s["ps"]["mp"].update(realtime=False), s["reg"].update({C.R["def_policy_rt"]: 1})), "defender", "critical", None),
     (_ps("mp", sig_age=9), "signatures", "medium", "safe"),
     (_ps("mppref", maps=0), "cloud", "medium", "safe"),
     (_ps("mppref", pua=0), "pua", "medium", "safe"),

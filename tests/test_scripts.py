@@ -75,10 +75,13 @@ class Scripts(unittest.TestCase):
         d = Path(tempfile.mkdtemp())
         try:
             a, u, _ = fixes.write(C.evaluate(weak()), d / "harden.ps1", "caution")
-            code = ("foreach ($f in $args) { $e = $null; [Management.Automation.Language.Parser]::ParseFile($f, [ref]$null, "
-                    "[ref]$e) | Out-Null; foreach ($x in $e) { \"$f`:$($x.Extent.StartLineNumber): $($x.Message)\" } }")
-            p = subprocess.run(["powershell", "-NoProfile", "-Command", code, str(a), str(u)], capture_output=True, text=True)
-            self.assertEqual(p.stdout.strip(), "")
+            # paths go inside the command as literals: extra -Command arguments would be run as commands
+            files = ", ".join("'" + str(f).replace("'", "''") + "'" for f in (a, u))
+            code = (f"foreach ($f in @({files})) {{ $e = $null; [Management.Automation.Language.Parser]::ParseFile($f, "
+                    "[ref]$null, [ref]$e) | Out-Null; foreach ($x in $e) { \"$f`:$($x.Extent.StartLineNumber): $($x.Message)\" } }; "
+                    "'parsed'")
+            p = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", code], capture_output=True, text=True)
+            self.assertEqual(p.stdout.strip(), "parsed")
         finally:
             shutil.rmtree(d)
 

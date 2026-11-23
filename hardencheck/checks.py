@@ -74,6 +74,8 @@ R = {
     "proxy_on": r"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\ProxyEnable",
     "proxy_server": r"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\ProxyServer",
     "proxy_pac": r"HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\AutoConfigURL",
+    "def_policy_rt": r"HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection\DisableRealtimeMonitoring",
+    "def_policy_off": r"HKLM\SOFTWARE\Policies\Microsoft\Windows Defender\DisableAntiSpyware",
     "edition": r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EditionID",
     "product": r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProductName",
     "display": r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\DisplayVersion",
@@ -118,7 +120,10 @@ def reg_fix(snap, path: str, value, risk="safe", note="", reboot=False, current=
 
 def mp_fix(param: str, value: int, current, risk="safe", note="") -> Fix:
     undo = f"Set-MpPreference -{param} {current}" if isinstance(current, int) else f"# {param} was not readable"
-    return Fix(risk, f"Set-MpPreference -{param} {value}", undo, note)
+    # Set-MpPreference reports success even when a policy overrides it: check it took
+    apply = (f"Set-MpPreference -{param} {value}; if ([int](Get-MpPreference).{param} -ne {value}) "
+             f"{{ throw 'not applied: a policy or another antivirus controls this setting' }}")
+    return Fix(risk, apply, undo, note)
 
 
 def service_fix(svc: dict, risk="safe", note="") -> Fix:
@@ -605,7 +610,14 @@ def defender(snap):
         c.status, c.detail = "info", f"another antivirus is primary (Defender mode: {mp['mode']})"
     elif mp.get("realtime") is False:
         c.status, c.detail = "fail", "off"
-        c.fix = Fix("safe", "Set-MpPreference -DisableRealtimeMonitoring $false", "Set-MpPreference -DisableRealtimeMonitoring $true")
+        if 1 in (reg(snap, "def_policy_rt"), reg(snap, "def_policy_off")):
+            c.detail += " by Group Policy"
+            c.manual = "a policy turns it off (Windows Defender policies under HKLM\SOFTWARE\Policies); if you or your "                        "company didn't set it, malware did: remove the policy, then scan with Defender offline"
+        else:
+            c.fix = Fix("safe", "Set-MpPreference -DisableRealtimeMonitoring $false; Start-Sleep -Seconds 3; "
+                                "if (-not (Get-MpComputerStatus).RealTimeProtectionEnabled) "
+                                "{ throw 'still off: a policy or another antivirus controls it' }",
+                        "Set-MpPreference -DisableRealtimeMonitoring $true")
     else:
         c.detail = "on"
     return c
