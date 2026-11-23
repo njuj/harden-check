@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "harden-check"
+dynamic = ["version"]
+description = "Grade a Windows PC's network and device security in one read-only scan (51 checks), then write the fixes as a PowerShell script with an exact undo. Zero dependencies."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "kira", email = "286490266+njuj@users.noreply.github.com" }]
+keywords = ["windows-security", "hardening", "defender", "asr", "firewall", "smb", "llmnr", "blue-team"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://github.com/njuj/harden-check"
+
+[project.scripts]
+harden-check = "hardencheck.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "hardencheck.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["hardencheck*"]

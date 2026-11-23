@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: checks, scripts, command line (plus a live scan on Windows)
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python -m unittest discover -s tests -t . -v
+
+  roundtrip:
+    # a throwaway Windows VM: apply every safe fix for real, confirm each took, undo, confirm nothing changed
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: scan before
+        run: python -m hardencheck --all --no-color; exit 0
+      - name: apply all safe fixes, then undo them
+        env:
+          PYTHONIOENCODING: utf-8
+          HARDEN_CHECK_ROUNDTRIP: "1"
+        run: python -m unittest tests.test_scripts.RoundTrip -v
