@@ -14,6 +14,10 @@ dependencies.
 ![deps](https://img.shields.io/badge/dependencies-0-00ff9c?labelColor=0b0f17)
 ![license](https://img.shields.io/badge/license-MIT-00ff9c?labelColor=0b0f17)
 
+<p align="center"><img src="docs/banner.svg" width="100%" alt="harden-check: how it works"/></p>
+
+<p align="center"><img src="docs/demo.svg" width="100%" alt="harden-check running in a terminal"/></p>
+
 ```text
 $ python -m hardencheck
  harden-check 0.1.0  ·  Windows 11 Pro 26H2 (26300.10075)  ·  not elevated  ·  51 checks in 15.7s
