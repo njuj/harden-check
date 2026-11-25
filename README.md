@@ -1,6 +1,6 @@
 # harden-check
 
-[![Part of Cryptid Security](https://img.shields.io/badge/part_of-Cryptid%20Security-00ff9c?style=flat-square&labelColor=0d1117)](https://github.com/cryptid-security)
+[![Part of Cryptid Security](https://img.shields.io/badge/part_of-Cryptid%20Security-c6922f?style=flat-square&labelColor=0c1411)](https://github.com/cryptid-security)
 
 **Grade a Windows PC's network and device security in one read-only scan, then write the fixes as a PowerShell
 script with an exact undo.** 51 checks: the firewall and the programs it lets in, SMB, LLMNR/NetBIOS poisoning,
